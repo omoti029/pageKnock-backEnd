@@ -10,4 +10,5 @@ type CommentItem struct {
 type PageStructureItem struct {
 	SiteDomain string `dynamodbav:"siteDomain"`
 	URL        string `dynamodbav:"url"`
+	Count      int    `dynamodbav:"count"`
 }
