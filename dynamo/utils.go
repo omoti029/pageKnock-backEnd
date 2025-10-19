@@ -4,7 +4,12 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+	"time"
 )
+
+func GetUnixMillsecound() int64 {
+	return time.Now().UnixMilli()
+}
 
 func GetDomainWithScheme(rawURL string) (string, error) {
 	parsed, err := url.Parse(rawURL)
