@@ -8,6 +8,6 @@ type CommentItem struct {
 }
 
 type PageStructureItem struct {
-	Domain string `dynamodbav:"domain"`
-	URL    string `dynamodbav:"url"`
+	SiteDomain string `dynamodbav:"siteDomain"`
+	URL        string `dynamodbav:"url"`
 }
