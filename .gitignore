@@ -1,0 +1,41 @@
+# === Go build artifacts ===
+bin/
+build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# === Go modules ===
+vendor/
+go.work
+go.work.sum
+
+# === Environment / Secrets ===
+# .env
+# *.env.*
+# !example.env
+
+# === Logs / Debug ===
+*.log
+*.tmp
+*.bak
+*.swp
+*.swm
+*.swo
+
+# === IDE / Editor ===
+.vscode/
+.idea/
+*.iml
+
+# === OS specific ===
+.DS_Store
+Thumbs.db
+
+# === Temporary local testing ===
+tmp/
+testdata/
