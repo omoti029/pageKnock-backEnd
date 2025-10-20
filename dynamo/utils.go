@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 func GetUnixMillsecound() int64 {
@@ -24,4 +26,9 @@ func GetDomainWithScheme(rawURL string) (string, error) {
 
 	domain := fmt.Sprintf("%s://%s", scheme, parsed.Host)
 	return strings.TrimRight(domain, "/"), nil
+}
+
+func GenerateCommentId() string {
+	id := uuid.New()
+	return id.String()
 }
