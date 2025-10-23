@@ -20,6 +20,7 @@ var (
 	commentTable             string
 	pageStructureTable       string
 	recentGlobalCommentTable string
+	recentDomainCommentTable string
 )
 
 func init() {
@@ -32,6 +33,7 @@ func init() {
 	commentTable = os.Getenv("DYNAMO_TABLE_NAME_COMMENT")
 	pageStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGESTRUCTURE")
 	recentGlobalCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTGLOBALCOMMENT")
+	recentDomainCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTDOMAINCOMMENT")
 
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 	if err != nil {
@@ -101,6 +103,26 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	domain, err := dynamo.GetDomainWithScheme(req.URL)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("URL変換処理失敗: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	recentDomainComment := dynamo.RecentDomainCommentItem{
+		SiteDomain: domain,
+		URL:        req.URL,
+		UnixTime:   nowUnix,
+		UserID:     "0",
+		Comment:    req.Comment,
+		CommentId:  commentId,
+	}
+
+	err = dynamo.PutRecentDomainComment(client, recentDomainCommentTable, recentDomainComment)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
+		return
+	}
 
 	err = handleStructureProcess(req.URL)
 	if err != nil {
