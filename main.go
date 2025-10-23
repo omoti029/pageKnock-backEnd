@@ -67,11 +67,14 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	commentId := dynamo.GenerateCommentId()
+
 	comment := dynamo.CommentItem{
-		URL:      req.URL,
-		UnixTime: dynamo.GetUnixMillsecound(),
-		UserID:   "0",
-		Comment:  req.Comment,
+		URL:       req.URL,
+		UnixTime:  dynamo.GetUnixMillsecound(),
+		UserID:    "0",
+		Comment:   req.Comment,
+		CommentId: commentId,
 	}
 
 	err := dynamo.PutComment(client, commentTable, comment)
