@@ -16,9 +16,10 @@ import (
 )
 
 var (
-	client             *dynamodb.Client
-	commentTable       string
-	pageStructureTable string
+	client                   *dynamodb.Client
+	commentTable             string
+	pageStructureTable       string
+	recentGlobalCommentTable string
 )
 
 func init() {
@@ -30,6 +31,7 @@ func init() {
 	region := os.Getenv("AWS_REGION")
 	commentTable = os.Getenv("DYNAMO_TABLE_NAME_COMMENT")
 	pageStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGESTRUCTURE")
+	recentGlobalCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTGLOBALCOMMENT")
 
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 	if err != nil {
@@ -68,10 +70,11 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	commentId := dynamo.GenerateCommentId()
+	nowUnix := dynamo.GetUnixMillsecound()
 
 	comment := dynamo.CommentItem{
 		URL:       req.URL,
-		UnixTime:  dynamo.GetUnixMillsecound(),
+		UnixTime:  nowUnix,
 		UserID:    "0",
 		Comment:   req.Comment,
 		CommentId: commentId,
@@ -82,6 +85,22 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
 	}
+
+	recentGlobalComment := dynamo.RecentGlobalCommentItem{
+		GlobalRecent: "GLOBAL_RECENT",
+		URL:          req.URL,
+		UnixTime:     nowUnix,
+		UserID:       "0",
+		Comment:      req.Comment,
+		CommentId:    commentId,
+	}
+
+	err = dynamo.PutRecentGlobalComment(client, recentGlobalCommentTable, recentGlobalComment)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
+		return
+	}
+
 
 	err = handleStructureProcess(req.URL)
 	if err != nil {
