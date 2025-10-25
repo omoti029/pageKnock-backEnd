@@ -79,7 +79,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 	nowUnix := dynamo.GetUnixMillsecound()
 
 	comment := dynamo.CommentItem{
-		URL:       req.URL,
+		Url:       req.URL,
 		UnixTime:  nowUnix,
 		Comment:   req.Comment,
 		CommentId: commentId,
@@ -97,7 +97,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		UnixTime:  nowUnix,
 		Comment:   req.Comment,
 		CommentId: commentId,
-		URL:       req.URL,
+		Url:       req.URL,
 		UserID:    "0",
 	}
 
@@ -118,7 +118,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		UnixTime:  nowUnix,
 		Comment:   req.Comment,
 		CommentId: commentId,
-		URL:       req.URL,
+		Url:       req.URL,
 		UserID:    "0",
 	}
 
@@ -180,7 +180,7 @@ func handleStructureProcess(url string) error {
 
 		structureItem := dynamo.PageStructureItem{
 			Domain: domain,
-			URL:    url,
+			Url:    url,
 			Count:  1,
 		}
 
