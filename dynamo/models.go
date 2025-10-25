@@ -3,7 +3,7 @@ package dynamo
 type CommentItem struct {
 	URL       string `dynamodbav:"url"`
 	UnixTime  int64  `dynamodbav:"unixTime"`
-	UserID    string `dynamodbav:"user_id"`
+	UserID    string `dynamodbav:"userId"`
 	Comment   string `dynamodbav:"comment"`
 	CommentId string `dynamodbav:"commentId"`
 }
@@ -21,7 +21,7 @@ type RecentDomainCommentItem struct {
 	SiteDomain string `dynamodbav:"siteDomain"`
 	URL        string `dynamodbav:"url"`
 	UnixTime   int64  `dynamodbav:"unixTime"`
-	UserID     string `dynamodbav:"user_id"`
+	UserID     string `dynamodbav:"userId"`
 	Comment    string `dynamodbav:"comment"`
 	CommentId  string `dynamodbav:"commentId"`
 }
