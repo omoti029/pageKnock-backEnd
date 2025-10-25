@@ -19,10 +19,10 @@ var (
 	client                   *dynamodb.Client
 	commentTable             string
 	commentLogTable          string
-	pageStructureTable       string
 	pageGlobalStructureTable string
-	recentGlobalCommentTable string
+	pageStructureTable       string
 	recentDomainCommentTable string
+	recentGlobalCommentTable string
 )
 
 func init() {
@@ -34,10 +34,10 @@ func init() {
 	region := os.Getenv("AWS_REGION")
 	commentTable = os.Getenv("DYNAMO_TABLE_NAME_COMMENT")
 	commentLogTable = os.Getenv("DYNAMO_TABLE_NAME_COMMENTLOG")
-	pageStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGESTRUCTURE")
 	pageGlobalStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGEGLOBALSTRUCTURE")
-	recentGlobalCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTGLOBALCOMMENT")
+	pageStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGESTRUCTURE")
 	recentDomainCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTDOMAINCOMMENT")
+	recentGlobalCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTGLOBALCOMMENT")
 
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 	if err != nil {
@@ -81,9 +81,9 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 	comment := dynamo.CommentItem{
 		URL:       req.URL,
 		UnixTime:  nowUnix,
-		UserID:    "0",
 		Comment:   req.Comment,
 		CommentId: commentId,
+		UserID:    "0",
 	}
 
 	err := dynamo.PutComment(client, commentTable, comment)
@@ -95,10 +95,10 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 	recentGlobalComment := dynamo.RecentGlobalCommentItem{
 		Global:    "GLOBAL",
 		URL:       req.URL,
-		UnixTime:  nowUnix,
-		UserID:    "0",
 		Comment:   req.Comment,
 		CommentId: commentId,
+		UnixTime:  nowUnix,
+		UserID:    "0",
 	}
 
 	err = dynamo.PutRecentGlobalComment(client, recentGlobalCommentTable, recentGlobalComment)
@@ -115,11 +115,11 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 
 	recentDomainComment := dynamo.RecentDomainCommentItem{
 		SiteDomain: domain,
-		URL:        req.URL,
 		UnixTime:   nowUnix,
-		UserID:     "0",
 		Comment:    req.Comment,
 		CommentId:  commentId,
+		URL:        req.URL,
+		UserID:     "0",
 	}
 
 	err = dynamo.PutRecentDomainComment(client, recentDomainCommentTable, recentDomainComment)
@@ -130,10 +130,10 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 
 	CommentLog := dynamo.CommentLogItem{
 		Global:    "GOLBAL",
+		UnixTime:  nowUnix,
 		CommentId: commentId,
 		Ip:        dynamo.GetIpAddress(w, r),
 		UserAgent: dynamo.GetUserAgent(w, r),
-		UnixTime:  nowUnix,
 	}
 
 	err = dynamo.PutCommentLog(client, commentLogTable, CommentLog)
@@ -179,8 +179,8 @@ func handleStructureProcess(url string) error {
 	} else {
 
 		structureItem := dynamo.PageStructureItem{
-			URL:        url,
 			SiteDomain: domain,
+			URL:        url,
 			Count:      1,
 		}
 
