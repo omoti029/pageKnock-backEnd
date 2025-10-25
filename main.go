@@ -16,13 +16,13 @@ import (
 )
 
 var (
-	client                   *dynamodb.Client
-	commentTable             string
-	commentLogTable          string
-	pageGlobalStructureTable string
-	pageStructureTable       string
-	recentDomainCommentTable string
-	recentGlobalCommentTable string
+	client                  *dynamodb.Client
+	commentRepo             *dynamo.CommentRepository
+	commentLogRepo          *dynamo.CommentLogRepository
+	pageGlobalStructureRepo *dynamo.PageGlobalStructureRepository
+	pageStructureRepo       *dynamo.PageStructureRepository
+	recentDomainCommentRepo *dynamo.RecentDomainCommentRepository
+	recentGlobalCommentRepo *dynamo.RecentGlobalCommentRepository
 )
 
 func init() {
@@ -32,12 +32,12 @@ func init() {
 	}
 
 	region := os.Getenv("AWS_REGION")
-	commentTable = os.Getenv("DYNAMO_TABLE_NAME_COMMENT")
-	commentLogTable = os.Getenv("DYNAMO_TABLE_NAME_COMMENTLOG")
-	pageGlobalStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGEGLOBALSTRUCTURE")
-	pageStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGESTRUCTURE")
-	recentDomainCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTDOMAINCOMMENT")
-	recentGlobalCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTGLOBALCOMMENT")
+	commentRepo = dynamo.NewCommentRepository(client, os.Getenv("DYNAMO_TABLE_NAME_COMMENT"))
+	commentLogRepo = dynamo.NewCommentLogRepository(client, os.Getenv("DYNAMO_TABLE_NAME_COMMENTLOG"))
+	pageGlobalStructureRepo = dynamo.NewPageGlobalStructureRepository(client, os.Getenv("DYNAMO_TABLE_NAME_PAGEGLOBALSTRUCTURE"))
+	pageStructureRepo = dynamo.NewPageStructureRepository(client, os.Getenv("DYNAMO_TABLE_NAME_PAGESTRUCTURE"))
+	recentDomainCommentRepo = dynamo.NewRecentDomainCommentRepository(client, os.Getenv("DYNAMO_TABLE_NAME_RECENTDOMAINCOMMENT"))
+	recentGlobalCommentRepo = dynamo.NewRecentGlobalCommentRepository(client, os.Getenv("DYNAMO_TABLE_NAME_RECENTGLOBALCOMMENT"))
 
 	cfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(region))
 	if err != nil {
@@ -86,7 +86,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		UserID:    "0",
 	}
 
-	err := dynamo.PutComment(client, commentTable, comment)
+	err := commentRepo.PutComment(comment)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
@@ -101,7 +101,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		UserID:    "0",
 	}
 
-	err = dynamo.PutRecentGlobalComment(client, recentGlobalCommentTable, recentGlobalComment)
+	err = recentGlobalCommentRepo.PutRecentGlobalComment(recentGlobalComment)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
@@ -122,7 +122,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		UserID:    "0",
 	}
 
-	err = dynamo.PutRecentDomainComment(client, recentDomainCommentTable, recentDomainComment)
+	err = recentDomainCommentRepo.PutRecentDomainComment(recentDomainComment)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
@@ -136,7 +136,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		UserAgent: dynamo.GetUserAgent(w, r),
 	}
 
-	err = dynamo.PutCommentLog(client, commentLogTable, CommentLog)
+	err = commentLogRepo.PutCommentLog(CommentLog)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
@@ -164,14 +164,14 @@ func handleStructureProcess(url string) error {
 		return err //Failed to fetch data from DynamoDB
 	}
 
-	isExists, err := dynamo.ExistsStructureByDomainAndURL(client, pageStructureTable, domain, url)
+	isExists, err := pageStructureRepo.ExistsStructureByDomainAndURL(domain, url)
 	if err != nil {
 		return err //Failed to fetch data from DynamoDB
 	}
 
 	if isExists {
 
-		err := dynamo.IncrementStructureCountByURL(client, pageStructureTable, domain, url)
+		err := pageStructureRepo.IncrementStructureCountByURL(domain, url)
 		if err != nil {
 			return err //Failed to fetch data from DynamoDB
 		}
@@ -184,20 +184,20 @@ func handleStructureProcess(url string) error {
 			Count:  1,
 		}
 
-		PutStructureErr := dynamo.PutStructure(client, pageStructureTable, structureItem)
+		PutStructureErr := pageStructureRepo.PutStructure(structureItem)
 		if PutStructureErr != nil {
 			return err //Failed to write data to DynamoDB
 		}
 	}
 
-	isGlobalStructureExists, err := dynamo.ExistsGlobalStructureByDomainAndURL(client, pageGlobalStructureTable, domain)
+	isGlobalStructureExists, err := pageGlobalStructureRepo.ExistsGlobalStructureByDomainAndURL(domain)
 	if err != nil {
 		return err //Failed to fetch data from DynamoDB
 	}
 
 	if isGlobalStructureExists {
 
-		err := dynamo.IncrementGlobalStructureCountByURL(client, pageGlobalStructureTable, domain)
+		err := pageGlobalStructureRepo.IncrementGlobalStructureCountByURL(domain)
 		if err != nil {
 			return err //Failed to fetch data from DynamoDB
 		}
@@ -210,7 +210,7 @@ func handleStructureProcess(url string) error {
 			Count:  1,
 		}
 
-		PutStructureErr := dynamo.PutGlobalStructure(client, pageGlobalStructureTable, globalStructureItem)
+		PutStructureErr := pageGlobalStructureRepo.PutGlobalStructure(globalStructureItem)
 		if PutStructureErr != nil {
 			return err //Failed to write data to DynamoDB
 		}
