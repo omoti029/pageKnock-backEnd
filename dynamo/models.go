@@ -9,12 +9,12 @@ type CommentItem struct {
 }
 
 type RecentGlobalCommentItem struct {
-	GlobalRecent string `dynamodbav:"globalRecent"`
-	URL          string `dynamodbav:"url"`
-	UnixTime     int64  `dynamodbav:"unixTime"`
-	UserID       string `dynamodbav:"user_id"`
-	Comment      string `dynamodbav:"comment"`
-	CommentId    string `dynamodbav:"commentId"`
+	Global    string `dynamodbav:"global"`
+	URL       string `dynamodbav:"url"`
+	UnixTime  int64  `dynamodbav:"unixTime"`
+	UserID    string `dynamodbav:"userId"`
+	Comment   string `dynamodbav:"comment"`
+	CommentId string `dynamodbav:"commentId"`
 }
 
 type RecentDomainCommentItem struct {
@@ -41,7 +41,7 @@ type PageStructureItem struct {
 }
 
 type PageGlobalStructureItem struct {
-	GlobalSiteDomain string `dynamodbav:"globalSiteDomain"`
-	SiteDomain       string `dynamodbav:"siteDomain"`
-	Count            int    `dynamodbav:"count"`
+	Global     string `dynamodbav:"global"`
+	SiteDomain string `dynamodbav:"siteDomain"`
+	Count      int    `dynamodbav:"count"`
 }

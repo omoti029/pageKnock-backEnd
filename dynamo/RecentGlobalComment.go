@@ -26,9 +26,9 @@ func PutRecentGlobalComment(client *dynamodb.Client, tableName string, item Rece
 func GetRecentGlobalComment(client *dynamodb.Client, tableName string) ([]RecentGlobalCommentItem, error) {
 	input := &dynamodb.QueryInput{
 		TableName:              aws.String(tableName),
-		KeyConditionExpression: aws.String("globalRecent = :u"),
+		KeyConditionExpression: aws.String("global = :u"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":u": &types.AttributeValueMemberS{Value: "GLOBAL_RECENT"},
+			":u": &types.AttributeValueMemberS{Value: "GLOBAL"},
 		},
 		ScanIndexForward: aws.Bool(false),
 		Limit:            aws.Int32(100),

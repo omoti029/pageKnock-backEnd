@@ -23,13 +23,13 @@ func PutGlobalStructure(client *dynamodb.Client, tableName string, item PageGlob
 	return err
 }
 
-func GetGlobalStructureBySiteDomain(client *dynamodb.Client, tableName string) ([]PageGlobalStructureItem, error) {
+func GetGlobalStructure(client *dynamodb.Client, tableName string) ([]PageGlobalStructureItem, error) {
 
 	out, err := client.Query(context.TODO(), &dynamodb.QueryInput{
 		TableName:              aws.String(tableName),
-		KeyConditionExpression: aws.String("siteDomain = :d"),
+		KeyConditionExpression: aws.String("global = :u"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":d": &types.AttributeValueMemberS{Value: "GLOBAL"},
+			":u": &types.AttributeValueMemberS{Value: "GLOBAL"},
 		},
 	})
 	if err != nil {
@@ -50,6 +50,7 @@ func IncrementGlobalStructureCountByURL(client *dynamodb.Client, tableName strin
 	_, err := client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
 		TableName: aws.String(tableName),
 		Key: map[string]types.AttributeValue{
+			"global":     &types.AttributeValueMemberS{Value: "GLOBAL"},
 			"siteDomain": &types.AttributeValueMemberS{Value: siteDomain},
 		},
 		UpdateExpression: aws.String("ADD #c :inc"),
@@ -63,7 +64,7 @@ func IncrementGlobalStructureCountByURL(client *dynamodb.Client, tableName strin
 	})
 
 	if err != nil {
-		return fmt.Errorf("failed to increment count for %s: %w", err)
+		return fmt.Errorf("failed to increment count for %s", err)
 	}
 
 	return nil
@@ -74,9 +75,10 @@ func ExistsGlobalStructureBySiteDomainAndURL(client *dynamodb.Client, tableName 
 	out, err := client.GetItem(context.TODO(), &dynamodb.GetItemInput{
 		TableName: aws.String(tableName),
 		Key: map[string]types.AttributeValue{
+			"global":     &types.AttributeValueMemberS{Value: "GLOBAL"},
 			"siteDomain": &types.AttributeValueMemberS{Value: siteDomain},
 		},
-		ProjectionExpression: aws.String("siteDomain"),
+		ProjectionExpression: aws.String("global"),
 	})
 	if err != nil {
 		return false, fmt.Errorf("failed to get item: %w", err)

@@ -93,12 +93,12 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	recentGlobalComment := dynamo.RecentGlobalCommentItem{
-		GlobalRecent: "GLOBAL_RECENT",
-		URL:          req.URL,
-		UnixTime:     nowUnix,
-		UserID:       "0",
-		Comment:      req.Comment,
-		CommentId:    commentId,
+		Global:    "GLOBAL",
+		URL:       req.URL,
+		UnixTime:  nowUnix,
+		UserID:    "0",
+		Comment:   req.Comment,
+		CommentId: commentId,
 	}
 
 	err = dynamo.PutRecentGlobalComment(client, recentGlobalCommentTable, recentGlobalComment)
@@ -205,9 +205,9 @@ func handleStructureProcess(url string) error {
 	} else {
 
 		globalStructureItem := dynamo.PageGlobalStructureItem{
-			GlobalSiteDomain: "GLOBAL",
-			SiteDomain:       domain,
-			Count:            1,
+			Global:     "GLOBAL",
+			SiteDomain: domain,
+			Count:      1,
 		}
 
 		PutStructureErr := dynamo.PutGlobalStructure(client, pageGlobalStructureTable, globalStructureItem)
