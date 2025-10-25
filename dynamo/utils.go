@@ -2,6 +2,7 @@ package dynamo
 
 import (
 	"fmt"
+	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -31,4 +32,17 @@ func GetDomainWithScheme(rawURL string) (string, error) {
 func GenerateCommentId() string {
 	id := uuid.New()
 	return id.String()
+}
+
+func GetIpAddress(w http.ResponseWriter, req *http.Request) string {
+	ip := req.Header.Get("X-Forwarded-For")
+	if ip == "" {
+		ip = req.RemoteAddr
+	}
+	return ip
+}
+
+func GetUserAgent(w http.ResponseWriter, req *http.Request) string {
+	userAgent := req.Header.Get("User-Agent")
+	return userAgent
 }

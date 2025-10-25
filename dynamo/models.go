@@ -26,6 +26,14 @@ type RecentDomainCommentItem struct {
 	CommentId  string `dynamodbav:"commentId"`
 }
 
+type CommentLogItem struct {
+	Global    string `dynamodbav:"global"`
+	CommentId string `dynamodbav:"commentId"`
+	Ip        string `dynamodbav:"ip"`
+	UserAgent string `dynamodbav:"userAgent"`
+	UnixTime  int64  `dynamodbav:"unixTime"`
+}
+
 type PageStructureItem struct {
 	SiteDomain string `dynamodbav:"siteDomain"`
 	URL        string `dynamodbav:"url"`

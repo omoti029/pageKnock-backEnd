@@ -18,6 +18,7 @@ import (
 var (
 	client                   *dynamodb.Client
 	commentTable             string
+	commentLogTable          string
 	pageStructureTable       string
 	pageGlobalStructureTable string
 	recentGlobalCommentTable string
@@ -32,6 +33,7 @@ func init() {
 
 	region := os.Getenv("AWS_REGION")
 	commentTable = os.Getenv("DYNAMO_TABLE_NAME_COMMENT")
+	commentLogTable = os.Getenv("DYNAMO_TABLE_NAME_COMMENTLOG")
 	pageStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGESTRUCTURE")
 	pageGlobalStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGEGLOBALSTRUCTURE")
 	recentGlobalCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTGLOBALCOMMENT")
@@ -121,6 +123,20 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = dynamo.PutRecentDomainComment(client, recentDomainCommentTable, recentDomainComment)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	CommentLog := dynamo.CommentLogItem{
+		Global:    "GOLBAL",
+		CommentId: commentId,
+		Ip:        dynamo.GetIpAddress(w, r),
+		UserAgent: dynamo.GetUserAgent(w, r),
+		UnixTime:  nowUnix,
+	}
+
+	err = dynamo.PutCommentLog(client, commentLogTable, CommentLog)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
