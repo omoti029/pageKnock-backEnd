@@ -45,13 +45,13 @@ func GetGlobalStructure(client *dynamodb.Client, tableName string) ([]PageGlobal
 	return records, nil
 }
 
-func IncrementGlobalStructureCountByURL(client *dynamodb.Client, tableName string, siteDomain string) error {
+func IncrementGlobalStructureCountByURL(client *dynamodb.Client, tableName string, domain string) error {
 
 	_, err := client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
 		TableName: aws.String(tableName),
 		Key: map[string]types.AttributeValue{
-			"global":     &types.AttributeValueMemberS{Value: "GLOBAL"},
-			"siteDomain": &types.AttributeValueMemberS{Value: siteDomain},
+			"global": &types.AttributeValueMemberS{Value: "GLOBAL"},
+			"domain": &types.AttributeValueMemberS{Value: domain},
 		},
 		UpdateExpression: aws.String("ADD #c :inc"),
 		ExpressionAttributeNames: map[string]string{
@@ -70,13 +70,13 @@ func IncrementGlobalStructureCountByURL(client *dynamodb.Client, tableName strin
 	return nil
 }
 
-func ExistsGlobalStructureBySiteDomainAndURL(client *dynamodb.Client, tableName string, siteDomain string) (bool, error) {
+func ExistsGlobalStructureByDomainAndURL(client *dynamodb.Client, tableName string, domain string) (bool, error) {
 
 	out, err := client.GetItem(context.TODO(), &dynamodb.GetItemInput{
 		TableName: aws.String(tableName),
 		Key: map[string]types.AttributeValue{
-			"global":     &types.AttributeValueMemberS{Value: "GLOBAL"},
-			"siteDomain": &types.AttributeValueMemberS{Value: siteDomain},
+			"global": &types.AttributeValueMemberS{Value: "GLOBAL"},
+			"domain": &types.AttributeValueMemberS{Value: domain},
 		},
 		ProjectionExpression: aws.String("global"),
 	})

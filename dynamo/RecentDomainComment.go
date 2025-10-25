@@ -23,12 +23,12 @@ func PutRecentDomainComment(client *dynamodb.Client, tableName string, item Rece
 	return err
 }
 
-func GetRecentDomainComment(client *dynamodb.Client, tableName string, siteDomain string) ([]RecentDomainCommentItem, error) {
+func GetRecentDomainComment(client *dynamodb.Client, tableName string, domain string) ([]RecentDomainCommentItem, error) {
 	input := &dynamodb.QueryInput{
 		TableName:              aws.String(tableName),
-		KeyConditionExpression: aws.String("siteDomain = :u"),
+		KeyConditionExpression: aws.String("domain = :u"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":u": &types.AttributeValueMemberS{Value: siteDomain},
+			":u": &types.AttributeValueMemberS{Value: domain},
 		},
 		ScanIndexForward: aws.Bool(false),
 		Limit:            aws.Int32(100),

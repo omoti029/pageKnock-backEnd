@@ -17,23 +17,23 @@ type CommentLogItem struct {
 }
 
 type PageGlobalStructureItem struct {
-	Global     string `dynamodbav:"global"`     //PartitionKey
-	SiteDomain string `dynamodbav:"siteDomain"` //Sort
-	Count      int    `dynamodbav:"count"`
+	Global string `dynamodbav:"global"` //PartitionKey
+	Domain string `dynamodbav:"domain"` //Sort
+	Count  int    `dynamodbav:"count"`
 }
 type PageStructureItem struct {
-	SiteDomain string `dynamodbav:"siteDomain"` //PartitionKey
-	URL        string `dynamodbav:"url"`        //Sort
-	Count      int    `dynamodbav:"count"`
+	Domain string `dynamodbav:"domain"` //PartitionKey
+	URL    string `dynamodbav:"url"`    //Sort
+	Count  int    `dynamodbav:"count"`
 }
 
 type RecentDomainCommentItem struct {
-	SiteDomain string `dynamodbav:"siteDomain"` //PartitionKey
-	UnixTime   int64  `dynamodbav:"unixTime"`   //Sort
-	Comment    string `dynamodbav:"comment"`
-	CommentId  string `dynamodbav:"commentId"`
-	URL        string `dynamodbav:"url"`
-	UserID     string `dynamodbav:"userId"`
+	Domain    string `dynamodbav:"domain"`   //PartitionKey
+	UnixTime  int64  `dynamodbav:"unixTime"` //Sort
+	Comment   string `dynamodbav:"comment"`
+	CommentId string `dynamodbav:"commentId"`
+	URL       string `dynamodbav:"url"`
+	UserID    string `dynamodbav:"userId"`
 }
 
 type RecentGlobalCommentItem struct {

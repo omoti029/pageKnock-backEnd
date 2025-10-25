@@ -23,13 +23,13 @@ func PutStructure(client *dynamodb.Client, tableName string, item PageStructureI
 	return err
 }
 
-func GetStructureBySiteDomain(client *dynamodb.Client, tableName string, siteDomain string) ([]PageStructureItem, error) {
+func GetStructureBydomain(client *dynamodb.Client, tableName string, domain string) ([]PageStructureItem, error) {
 
 	out, err := client.Query(context.TODO(), &dynamodb.QueryInput{
 		TableName:              aws.String(tableName),
-		KeyConditionExpression: aws.String("siteDomain = :d"),
+		KeyConditionExpression: aws.String("domain = :d"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
-			":d": &types.AttributeValueMemberS{Value: siteDomain},
+			":d": &types.AttributeValueMemberS{Value: domain},
 		},
 	})
 	if err != nil {
@@ -45,13 +45,13 @@ func GetStructureBySiteDomain(client *dynamodb.Client, tableName string, siteDom
 	return records, nil
 }
 
-func IncrementStructureCountByURL(client *dynamodb.Client, tableName string, siteDomain string, url string) error {
+func IncrementStructureCountByURL(client *dynamodb.Client, tableName string, domain string, url string) error {
 
 	_, err := client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
 		TableName: aws.String(tableName),
 		Key: map[string]types.AttributeValue{
-			"siteDomain": &types.AttributeValueMemberS{Value: siteDomain},
-			"url":        &types.AttributeValueMemberS{Value: url},
+			"domain": &types.AttributeValueMemberS{Value: domain},
+			"url":    &types.AttributeValueMemberS{Value: url},
 		},
 		UpdateExpression: aws.String("ADD #c :inc"),
 		ExpressionAttributeNames: map[string]string{
@@ -70,15 +70,15 @@ func IncrementStructureCountByURL(client *dynamodb.Client, tableName string, sit
 	return nil
 }
 
-func ExistsStructureBySiteDomainAndURL(client *dynamodb.Client, tableName string, siteDomain string, url string) (bool, error) {
+func ExistsStructureByDomainAndURL(client *dynamodb.Client, tableName string, domain string, url string) (bool, error) {
 
 	out, err := client.GetItem(context.TODO(), &dynamodb.GetItemInput{
 		TableName: aws.String(tableName),
 		Key: map[string]types.AttributeValue{
-			"siteDomain": &types.AttributeValueMemberS{Value: siteDomain},
-			"url":        &types.AttributeValueMemberS{Value: url},
+			"domain": &types.AttributeValueMemberS{Value: domain},
+			"url":    &types.AttributeValueMemberS{Value: url},
 		},
-		ProjectionExpression: aws.String("siteDomain"),
+		ProjectionExpression: aws.String("domain"),
 	})
 	if err != nil {
 		return false, fmt.Errorf("failed to get item: %w", err)

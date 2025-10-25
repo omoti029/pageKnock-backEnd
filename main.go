@@ -114,12 +114,12 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	recentDomainComment := dynamo.RecentDomainCommentItem{
-		SiteDomain: domain,
-		UnixTime:   nowUnix,
-		Comment:    req.Comment,
-		CommentId:  commentId,
-		URL:        req.URL,
-		UserID:     "0",
+		Domain:    domain,
+		UnixTime:  nowUnix,
+		Comment:   req.Comment,
+		CommentId: commentId,
+		URL:       req.URL,
+		UserID:    "0",
 	}
 
 	err = dynamo.PutRecentDomainComment(client, recentDomainCommentTable, recentDomainComment)
@@ -164,7 +164,7 @@ func handleStructureProcess(url string) error {
 		return err //Failed to fetch data from DynamoDB
 	}
 
-	isExists, err := dynamo.ExistsStructureBySiteDomainAndURL(client, pageStructureTable, domain, url)
+	isExists, err := dynamo.ExistsStructureByDomainAndURL(client, pageStructureTable, domain, url)
 	if err != nil {
 		return err //Failed to fetch data from DynamoDB
 	}
@@ -179,9 +179,9 @@ func handleStructureProcess(url string) error {
 	} else {
 
 		structureItem := dynamo.PageStructureItem{
-			SiteDomain: domain,
-			URL:        url,
-			Count:      1,
+			Domain: domain,
+			URL:    url,
+			Count:  1,
 		}
 
 		PutStructureErr := dynamo.PutStructure(client, pageStructureTable, structureItem)
@@ -190,7 +190,7 @@ func handleStructureProcess(url string) error {
 		}
 	}
 
-	isGlobalStructureExists, err := dynamo.ExistsGlobalStructureBySiteDomainAndURL(client, pageGlobalStructureTable, domain)
+	isGlobalStructureExists, err := dynamo.ExistsGlobalStructureByDomainAndURL(client, pageGlobalStructureTable, domain)
 	if err != nil {
 		return err //Failed to fetch data from DynamoDB
 	}
@@ -205,9 +205,9 @@ func handleStructureProcess(url string) error {
 	} else {
 
 		globalStructureItem := dynamo.PageGlobalStructureItem{
-			Global:     "GLOBAL",
-			SiteDomain: domain,
-			Count:      1,
+			Global: "GLOBAL",
+			Domain: domain,
+			Count:  1,
 		}
 
 		PutStructureErr := dynamo.PutGlobalStructure(client, pageGlobalStructureTable, globalStructureItem)
