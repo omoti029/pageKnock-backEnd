@@ -37,10 +37,10 @@ type RecentDomainCommentItem struct {
 }
 
 type RecentGlobalCommentItem struct {
-	Global    string `dynamodbav:"global"` //PartitionKey
-	URL       string `dynamodbav:"url"`    //Sort
+	Global    string `dynamodbav:"global"`   //PartitionKey
+	UnixTime  int64  `dynamodbav:"unixTime"` //Sort
 	Comment   string `dynamodbav:"comment"`
 	CommentId string `dynamodbav:"commentId"`
-	UnixTime  int64  `dynamodbav:"unixTime"`
+	URL       string `dynamodbav:"url"`
 	UserID    string `dynamodbav:"userId"`
 }
