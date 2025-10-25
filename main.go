@@ -19,6 +19,7 @@ var (
 	client                   *dynamodb.Client
 	commentTable             string
 	pageStructureTable       string
+	pageGlobalStructureTable string
 	recentGlobalCommentTable string
 	recentDomainCommentTable string
 )
@@ -32,6 +33,7 @@ func init() {
 	region := os.Getenv("AWS_REGION")
 	commentTable = os.Getenv("DYNAMO_TABLE_NAME_COMMENT")
 	pageStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGESTRUCTURE")
+	pageGlobalStructureTable = os.Getenv("DYNAMO_TABLE_NAME_PAGEGLOBALSTRUCTURE")
 	recentGlobalCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTGLOBALCOMMENT")
 	recentDomainCommentTable = os.Getenv("DYNAMO_TABLE_NAME_RECENTDOMAINCOMMENT")
 
@@ -160,13 +162,39 @@ func handleStructureProcess(url string) error {
 
 	} else {
 
-		comment := dynamo.PageStructureItem{
+		structureItem := dynamo.PageStructureItem{
 			URL:        url,
 			SiteDomain: domain,
 			Count:      1,
 		}
 
-		PutStructureErr := dynamo.PutStructure(client, pageStructureTable, comment)
+		PutStructureErr := dynamo.PutStructure(client, pageStructureTable, structureItem)
+		if PutStructureErr != nil {
+			return err //Failed to write data to DynamoDB
+		}
+	}
+
+	isGlobalStructureExists, err := dynamo.ExistsGlobalStructureBySiteDomainAndURL(client, pageGlobalStructureTable, domain)
+	if err != nil {
+		return err //Failed to fetch data from DynamoDB
+	}
+
+	if isGlobalStructureExists {
+
+		err := dynamo.IncrementGlobalStructureCountByURL(client, pageGlobalStructureTable, domain)
+		if err != nil {
+			return err //Failed to fetch data from DynamoDB
+		}
+
+	} else {
+
+		globalStructureItem := dynamo.PageGlobalStructureItem{
+			GlobalSiteDomain: "GLOBAL",
+			SiteDomain:       domain,
+			Count:            1,
+		}
+
+		PutStructureErr := dynamo.PutGlobalStructure(client, pageGlobalStructureTable, globalStructureItem)
 		if PutStructureErr != nil {
 			return err //Failed to write data to DynamoDB
 		}

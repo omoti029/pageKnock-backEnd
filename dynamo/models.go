@@ -31,3 +31,9 @@ type PageStructureItem struct {
 	URL        string `dynamodbav:"url"`
 	Count      int    `dynamodbav:"count"`
 }
+
+type PageGlobalStructureItem struct {
+	GlobalSiteDomain string `dynamodbav:"globalSiteDomain"`
+	SiteDomain       string `dynamodbav:"siteDomain"`
+	Count            int    `dynamodbav:"count"`
+}
