@@ -30,18 +30,19 @@ type CommentItem struct {
 }
 
 type CommentLogItem struct {
-	Global    string `dynamodbav:"global"`   //PartitionKey
-	UnixTime  int64  `dynamodbav:"unixTime"` //Sort
+	GlobalKey string `dynamodbav:"globalKey"` //PartitionKey
+	UnixTime  int64  `dynamodbav:"unixTime"`  //Sort
 	CommentId string `dynamodbav:"commentId"`
 	Ip        string `dynamodbav:"ip"`
 	UserAgent string `dynamodbav:"userAgent"`
 }
 
 type PageGlobalStructureItem struct {
-	Global     string `dynamodbav:"global"`     //PartitionKey
+	GlobalKey  string `dynamodbav:"globalKey"`  //PartitionKey
 	SiteDomain string `dynamodbav:"siteDomain"` //Sort
 	Count      int    `dynamodbav:"count"`
 }
+
 type PageStructureItem struct {
 	SiteDomain string `dynamodbav:"siteDomain"` //PartitionKey
 	Url        string `dynamodbav:"url"`        //Sort
@@ -58,8 +59,8 @@ type RecentDomainCommentItem struct {
 }
 
 type RecentGlobalCommentItem struct {
-	Global    string `dynamodbav:"global"`   //PartitionKey
-	UnixTime  int64  `dynamodbav:"unixTime"` //Sort
+	GlobalKey string `dynamodbav:"globalKey"` //PartitionKey
+	UnixTime  int64  `dynamodbav:"unixTime"`  //Sort
 	Comment   string `dynamodbav:"comment"`
 	CommentId string `dynamodbav:"commentId"`
 	Url       string `dynamodbav:"url"`

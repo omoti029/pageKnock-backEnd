@@ -57,14 +57,14 @@ func GenerateAllTableRecords(Datas BaseFieldDatas) AllTableRecords {
 			UserID:    Datas.UserId,
 		},
 		CommentLogItem: CommentLogItem{
-			Global:    "GLOBAL", // 生成関数などで作る
+			GlobalKey: "GLOBAL", // 生成関数などで作る
 			UnixTime:  Datas.Now,
 			CommentId: Datas.CommentId,
 			Ip:        GetIpAddress(Datas.Req),
 			UserAgent: GetUserAgent(Datas.Req),
 		},
 		PageGlobalStructureItem: PageGlobalStructureItem{
-			Global:     "GLOBAL",
+			GlobalKey:  "GLOBAL",
 			SiteDomain: Datas.SiteDomain,
 			Count:      1,
 		},
@@ -82,7 +82,7 @@ func GenerateAllTableRecords(Datas BaseFieldDatas) AllTableRecords {
 			UserID:     Datas.UserId,
 		},
 		RecentGlobalCommentItem: RecentGlobalCommentItem{
-			Global:    "GLOBAL",
+			GlobalKey: "GLOBAL",
 			UnixTime:  Datas.Now,
 			Comment:   Datas.Comment,
 			CommentId: Datas.CommentId,
