@@ -94,10 +94,10 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 
 	recentGlobalComment := dynamo.RecentGlobalCommentItem{
 		Global:    "GLOBAL",
-		URL:       req.URL,
+		UnixTime:  nowUnix,
 		Comment:   req.Comment,
 		CommentId: commentId,
-		UnixTime:  nowUnix,
+		URL:       req.URL,
 		UserID:    "0",
 	}
 
