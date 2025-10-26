@@ -1,7 +1,7 @@
 package dynamo
 
 type CommentItem struct {
-	URL       string `dynamodbav:"url"`      //PartitionKey
+	Url       string `dynamodbav:"url"`      //PartitionKey
 	UnixTime  int64  `dynamodbav:"unixTime"` //Sort
 	Comment   string `dynamodbav:"comment"`
 	CommentId string `dynamodbav:"commentId"`
@@ -23,7 +23,7 @@ type PageGlobalStructureItem struct {
 }
 type PageStructureItem struct {
 	SiteDomain string `dynamodbav:"siteDomain"` //PartitionKey
-	URL        string `dynamodbav:"url"`        //Sort
+	Url        string `dynamodbav:"url"`        //Sort
 	Count      int    `dynamodbav:"count"`
 }
 
@@ -32,7 +32,7 @@ type RecentDomainCommentItem struct {
 	UnixTime   int64  `dynamodbav:"unixTime"`   //Sort
 	Comment    string `dynamodbav:"comment"`
 	CommentId  string `dynamodbav:"commentId"`
-	URL        string `dynamodbav:"url"`
+	Url        string `dynamodbav:"url"`
 	UserID     string `dynamodbav:"userId"`
 }
 
@@ -41,6 +41,6 @@ type RecentGlobalCommentItem struct {
 	UnixTime  int64  `dynamodbav:"unixTime"` //Sort
 	Comment   string `dynamodbav:"comment"`
 	CommentId string `dynamodbav:"commentId"`
-	URL       string `dynamodbav:"url"`
+	Url       string `dynamodbav:"url"`
 	UserID    string `dynamodbav:"userId"`
 }

@@ -60,7 +60,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var req struct {
-		URL     string `json:"url"`
+		Url     string `json:"url"`
 		Comment string `json:"comment"`
 	}
 
@@ -70,7 +70,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	if req.URL == "" || req.Comment == "" {
+	if req.Url == "" || req.Comment == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
@@ -79,7 +79,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 	nowUnix := dynamo.GetUnixMillsecound()
 
 	comment := dynamo.CommentItem{
-		URL:       req.URL,
+		Url:       req.Url,
 		UnixTime:  nowUnix,
 		Comment:   req.Comment,
 		CommentId: commentId,
@@ -97,7 +97,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		UnixTime:  nowUnix,
 		Comment:   req.Comment,
 		CommentId: commentId,
-		URL:       req.URL,
+		Url:       req.Url,
 		UserID:    "0",
 	}
 
@@ -107,7 +107,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	domain, err := dynamo.GetDomainWithScheme(req.URL)
+	domain, err := dynamo.GetDomainWithScheme(req.Url)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("URL変換処理失敗: %v", err), http.StatusInternalServerError)
 		return
@@ -118,7 +118,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		UnixTime:   nowUnix,
 		Comment:    req.Comment,
 		CommentId:  commentId,
-		URL:        req.URL,
+		Url:        req.Url,
 		UserID:     "0",
 	}
 
@@ -142,7 +142,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = handleStructureProcess(req.URL)
+	err = handleStructureProcess(req.Url)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
@@ -150,7 +150,7 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 
 	resp := map[string]string{
 		"message": "Insert succeeded!",
-		"url":     req.URL,
+		"url":     req.Url,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -180,7 +180,7 @@ func handleStructureProcess(url string) error {
 
 		structureItem := dynamo.PageStructureItem{
 			SiteDomain: domain,
-			URL:        url,
+			Url:        url,
 			Count:      1,
 		}
 
