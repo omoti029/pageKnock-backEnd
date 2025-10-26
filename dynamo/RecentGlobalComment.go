@@ -10,22 +10,31 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-func PutRecentGlobalComment(client *dynamodb.Client, tableName string, item RecentGlobalCommentItem) error {
+type RecentGlobalCommentRepository struct {
+	client    *dynamodb.Client
+	tableName string
+}
+
+func NewRecentGlobalCommentRepository(client *dynamodb.Client, tableName string) *RecentGlobalCommentRepository {
+	return &RecentGlobalCommentRepository{client: client, tableName: tableName}
+}
+
+func (r *RecentGlobalCommentRepository) PutRecentGlobalComment(item RecentGlobalCommentItem) error {
 	av, err := attributevalue.MarshalMap(item)
 
 	if err != nil {
 		return fmt.Errorf("failed to marshal: %w", err)
 	}
-	_, err = client.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String(tableName),
+	_, err = r.client.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String(r.tableName),
 		Item:      av,
 	})
 	return err
 }
 
-func GetRecentGlobalComment(client *dynamodb.Client, tableName string) ([]RecentGlobalCommentItem, error) {
+func (r *RecentGlobalCommentRepository) GetRecentGlobalComment() ([]RecentGlobalCommentItem, error) {
 	input := &dynamodb.QueryInput{
-		TableName:              aws.String(tableName),
+		TableName:              aws.String(r.tableName),
 		KeyConditionExpression: aws.String("global = :u"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":u": &types.AttributeValueMemberS{Value: "GLOBAL"},
@@ -34,7 +43,7 @@ func GetRecentGlobalComment(client *dynamodb.Client, tableName string) ([]Recent
 		Limit:            aws.Int32(100),
 	}
 
-	out, err := client.Query(context.TODO(), input)
+	out, err := r.client.Query(context.TODO(), input)
 	if err != nil {
 		return nil, fmt.Errorf("query failed: %w", err)
 	}

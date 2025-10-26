@@ -10,22 +10,31 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 )
 
-func PutComment(client *dynamodb.Client, tableName string, item CommentItem) error {
+type CommentRepository struct {
+	client    *dynamodb.Client
+	tableName string
+}
+
+func NewCommentRepository(client *dynamodb.Client, tableName string) *CommentRepository {
+	return &CommentRepository{client: client, tableName: tableName}
+}
+
+func (r *CommentRepository) PutComment(item CommentItem) error {
 	av, err := attributevalue.MarshalMap(item)
 
 	if err != nil {
 		return fmt.Errorf("failed to marshal: %w", err)
 	}
-	_, err = client.PutItem(context.TODO(), &dynamodb.PutItemInput{
-		TableName: aws.String(tableName),
+	_, err = r.client.PutItem(context.TODO(), &dynamodb.PutItemInput{
+		TableName: aws.String(r.tableName),
 		Item:      av,
 	})
 	return err
 }
 
-func GetLatestCommentsByURL(client *dynamodb.Client, tableName string, url string) ([]CommentItem, error) {
+func (r *CommentRepository) GetLatestCommentsByURL(url string) ([]CommentItem, error) {
 	input := &dynamodb.QueryInput{
-		TableName:              aws.String(tableName),
+		TableName:              aws.String(r.tableName),
 		KeyConditionExpression: aws.String("url = :u"),
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":u": &types.AttributeValueMemberS{Value: url},
@@ -34,7 +43,7 @@ func GetLatestCommentsByURL(client *dynamodb.Client, tableName string, url strin
 		Limit:            aws.Int32(100),
 	}
 
-	out, err := client.Query(context.TODO(), input)
+	out, err := r.client.Query(context.TODO(), input)
 	if err != nil {
 		return nil, fmt.Errorf("query failed: %w", err)
 	}
