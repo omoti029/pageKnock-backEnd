@@ -1,5 +1,26 @@
 package dynamo
 
+import "net/http"
+
+type BaseFieldDatas struct {
+	Comment    string
+	CommentId  string
+	SiteDomain string
+	Now        int64
+	Req        *http.Request
+	Url        string
+	UserId     string
+}
+
+type AllTableRecords struct {
+	CommentItem             CommentItem
+	CommentLogItem          CommentLogItem
+	PageGlobalStructureItem PageGlobalStructureItem
+	PageStructureItem       PageStructureItem
+	RecentDomainCommentItem RecentDomainCommentItem
+	RecentGlobalCommentItem RecentGlobalCommentItem
+}
+
 type CommentItem struct {
 	Url       string `dynamodbav:"url"`      //PartitionKey
 	UnixTime  int64  `dynamodbav:"unixTime"` //Sort

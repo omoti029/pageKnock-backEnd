@@ -67,42 +67,11 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
+
 	defer r.Body.Close()
 
 	if req.Url == "" || req.Comment == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
-		return
-	}
-
-	commentId := dynamo.GenerateCommentId()
-	nowUnix := dynamo.GetUnixMillsecound()
-
-	comment := dynamo.CommentItem{
-		Url:       req.Url,
-		UnixTime:  nowUnix,
-		Comment:   req.Comment,
-		CommentId: commentId,
-		UserID:    "0",
-	}
-
-	err := commentRepo.PutComment(comment)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
-		return
-	}
-
-	recentGlobalComment := dynamo.RecentGlobalCommentItem{
-		Global:    "GLOBAL",
-		UnixTime:  nowUnix,
-		Comment:   req.Comment,
-		CommentId: commentId,
-		Url:       req.Url,
-		UserID:    "0",
-	}
-
-	err = recentGlobalCommentRepo.PutRecentGlobalComment(recentGlobalComment)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
 	}
 
@@ -112,36 +81,46 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	recentDomainComment := dynamo.RecentDomainCommentItem{
-		SiteDomain: domain,
-		UnixTime:   nowUnix,
+	commentId := dynamo.GenerateCommentId()
+	nowUnix := dynamo.GetUnixMillsecound()
+
+	baseFieldDatas := dynamo.BaseFieldDatas{
 		Comment:    req.Comment,
 		CommentId:  commentId,
+		SiteDomain: domain,
+		Now:        nowUnix,
+		Req:        r,
 		Url:        req.Url,
-		UserID:     "0",
+		UserId:     "1",
 	}
 
-	err = recentDomainCommentRepo.PutRecentDomainComment(recentDomainComment)
+	tableRecords := dynamo.GenerateAllTableRecords(baseFieldDatas)
+
+	err = commentRepo.PutComment(tableRecords.CommentItem)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	CommentLog := dynamo.CommentLogItem{
-		Global:    "GOLBAL",
-		UnixTime:  nowUnix,
-		CommentId: commentId,
-		Ip:        dynamo.GetIpAddress(w, r),
-		UserAgent: dynamo.GetUserAgent(w, r),
-	}
-
-	err = commentLogRepo.PutCommentLog(CommentLog)
+	err = recentGlobalCommentRepo.PutRecentGlobalComment(tableRecords.RecentGlobalCommentItem)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
 	}
 
-	err = handleStructureProcess(req.Url)
+	err = recentDomainCommentRepo.PutRecentDomainComment(tableRecords.RecentDomainCommentItem)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	err = commentLogRepo.PutCommentLog(tableRecords.CommentLogItem)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	err = handleStructureProcess(tableRecords, baseFieldDatas)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("DynamoDB書き込み失敗: %v", err), http.StatusInternalServerError)
 		return
@@ -149,71 +128,49 @@ func handlePostComment(w http.ResponseWriter, r *http.Request) {
 
 	resp := map[string]string{
 		"message": "Insert succeeded!",
-		"url":     req.Url,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(resp)
 }
 
-func handleStructureProcess(url string) error {
-
-	domain, err := dynamo.GetDomainWithScheme(url)
-	if err != nil {
-		return err //Failed to fetch data from DynamoDB
-	}
-
-	isExists, err := pageStructureRepo.ExistsStructureBySiteDomainAndURL(domain, url)
+func handleStructureProcess(tableRecords dynamo.AllTableRecords, baseFieldDatas dynamo.BaseFieldDatas) error {
+	isExists, err := pageStructureRepo.ExistsStructureBySiteDomainAndURL(baseFieldDatas.SiteDomain, baseFieldDatas.Url)
 	if err != nil {
 		return err //Failed to fetch data from DynamoDB
 	}
 
 	if isExists {
 
-		err := pageStructureRepo.IncrementStructureCountByURL(domain, url)
+		err := pageStructureRepo.IncrementStructureCountByURL(baseFieldDatas.SiteDomain, baseFieldDatas.Url)
 		if err != nil {
 			return err //Failed to fetch data from DynamoDB
 		}
 
 	} else {
-
-		structureItem := dynamo.PageStructureItem{
-			SiteDomain: domain,
-			Url:        url,
-			Count:      1,
-		}
-
-		PutStructureErr := pageStructureRepo.PutStructure(structureItem)
+		PutStructureErr := pageStructureRepo.PutStructure(tableRecords.PageStructureItem)
 		if PutStructureErr != nil {
 			return err //Failed to write data to DynamoDB
 		}
 	}
 
-	isGlobalStructureExists, err := pageGlobalStructureRepo.ExistsGlobalStructureBySiteDomainAndURL(domain)
+	isGlobalStructureExists, err := pageGlobalStructureRepo.ExistsGlobalStructureBySiteDomainAndURL(baseFieldDatas.SiteDomain)
 	if err != nil {
 		return err //Failed to fetch data from DynamoDB
 	}
 
 	if isGlobalStructureExists {
 
-		err := pageGlobalStructureRepo.IncrementGlobalStructureCountByURL(domain)
+		err := pageGlobalStructureRepo.IncrementGlobalStructureCountByURL(baseFieldDatas.SiteDomain)
 		if err != nil {
 			return err //Failed to fetch data from DynamoDB
 		}
 
 	} else {
-
-		globalStructureItem := dynamo.PageGlobalStructureItem{
-			Global:     "GLOBAL",
-			SiteDomain: domain,
-			Count:      1,
-		}
-
-		PutStructureErr := pageGlobalStructureRepo.PutGlobalStructure(globalStructureItem)
+		PutStructureErr := pageGlobalStructureRepo.PutGlobalStructure(tableRecords.PageGlobalStructureItem)
 		if PutStructureErr != nil {
 			return err //Failed to write data to DynamoDB
 		}
 	}
-
 	return nil
 }

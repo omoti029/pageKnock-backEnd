@@ -34,7 +34,7 @@ func GenerateCommentId() string {
 	return id.String()
 }
 
-func GetIpAddress(w http.ResponseWriter, req *http.Request) string {
+func GetIpAddress(req *http.Request) string {
 	ip := req.Header.Get("X-Forwarded-For")
 	if ip == "" {
 		ip = req.RemoteAddr
@@ -42,7 +42,52 @@ func GetIpAddress(w http.ResponseWriter, req *http.Request) string {
 	return ip
 }
 
-func GetUserAgent(w http.ResponseWriter, req *http.Request) string {
+func GetUserAgent(req *http.Request) string {
 	userAgent := req.Header.Get("User-Agent")
 	return userAgent
+}
+
+func GenerateAllTableRecords(Datas BaseFieldDatas) AllTableRecords {
+	return AllTableRecords{
+		CommentItem: CommentItem{
+			Url:       Datas.Url,
+			UnixTime:  Datas.Now,
+			Comment:   Datas.Comment,
+			CommentId: Datas.CommentId,
+			UserID:    Datas.UserId,
+		},
+		CommentLogItem: CommentLogItem{
+			Global:    "GLOBAL", // 生成関数などで作る
+			UnixTime:  Datas.Now,
+			CommentId: Datas.CommentId,
+			Ip:        GetIpAddress(Datas.Req),
+			UserAgent: GetUserAgent(Datas.Req),
+		},
+		PageGlobalStructureItem: PageGlobalStructureItem{
+			Global:     "GLOBAL",
+			SiteDomain: Datas.SiteDomain,
+			Count:      1,
+		},
+		PageStructureItem: PageStructureItem{
+			SiteDomain: Datas.SiteDomain,
+			Url:        Datas.Url,
+			Count:      1,
+		},
+		RecentDomainCommentItem: RecentDomainCommentItem{
+			SiteDomain: Datas.SiteDomain,
+			UnixTime:   Datas.Now,
+			Comment:    Datas.Comment,
+			CommentId:  Datas.CommentId,
+			Url:        Datas.Url,
+			UserID:     Datas.UserId,
+		},
+		RecentGlobalCommentItem: RecentGlobalCommentItem{
+			Global:    "GLOBAL",
+			UnixTime:  Datas.Now,
+			Comment:   Datas.Comment,
+			CommentId: Datas.CommentId,
+			Url:       Datas.Url,
+			UserID:    Datas.UserId,
+		},
+	}
 }
