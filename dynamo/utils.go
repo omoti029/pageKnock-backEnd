@@ -66,12 +66,12 @@ func GenerateAllTableRecords(Datas BaseFieldDatas) AllTableRecords {
 		PageGlobalStructureItem: PageGlobalStructureItem{
 			GlobalKey:  "GLOBAL",
 			SiteDomain: Datas.SiteDomain,
-			Count:      1,
+			UrlCount:   1,
 		},
 		PageStructureItem: PageStructureItem{
-			SiteDomain: Datas.SiteDomain,
-			Url:        Datas.Url,
-			Count:      1,
+			SiteDomain:   Datas.SiteDomain,
+			Url:          Datas.Url,
+			CommentCount: 1,
 		},
 		RecentDomainCommentItem: RecentDomainCommentItem{
 			SiteDomain: Datas.SiteDomain,

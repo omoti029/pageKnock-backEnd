@@ -54,7 +54,7 @@ func (r *PageStructureRepository) GetStructureBySiteDomain(siteDomain string) ([
 	return records, nil
 }
 
-func (r *PageStructureRepository) IncrementStructureCountByURL(siteDomain string, url string) error {
+func (r *PageStructureRepository) IncrementStructureCommentCountByURL(siteDomain string, url string) error {
 
 	_, err := r.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
 		TableName: aws.String(r.tableName),
@@ -64,7 +64,7 @@ func (r *PageStructureRepository) IncrementStructureCountByURL(siteDomain string
 		},
 		UpdateExpression: aws.String("ADD #c :inc"),
 		ExpressionAttributeNames: map[string]string{
-			"#c": "count",
+			"#c": "commentCount",
 		},
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":inc": &types.AttributeValueMemberN{Value: "1"},
@@ -73,7 +73,7 @@ func (r *PageStructureRepository) IncrementStructureCountByURL(siteDomain string
 	})
 
 	if err != nil {
-		return fmt.Errorf("failed to increment count for %s: %w", url, err)
+		return fmt.Errorf("failed to increment commentCount for %s: %w", url, err)
 	}
 
 	return nil

@@ -40,13 +40,13 @@ type CommentLogItem struct {
 type PageGlobalStructureItem struct {
 	GlobalKey  string `dynamodbav:"globalKey"`  //PartitionKey
 	SiteDomain string `dynamodbav:"siteDomain"` //Sort
-	Count      int    `dynamodbav:"count"`
+	UrlCount   int    `dynamodbav:"urlCount"`
 }
 
 type PageStructureItem struct {
-	SiteDomain string `dynamodbav:"siteDomain"` //PartitionKey
-	Url        string `dynamodbav:"url"`        //Sort
-	Count      int    `dynamodbav:"count"`
+	SiteDomain   string `dynamodbav:"siteDomain"` //PartitionKey
+	Url          string `dynamodbav:"url"`        //Sort
+	CommentCount int    `dynamodbav:"commentCount"`
 }
 
 type RecentDomainCommentItem struct {

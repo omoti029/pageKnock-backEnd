@@ -142,7 +142,7 @@ func handleStructureProcess(tableRecords dynamo.AllTableRecords, baseFieldDatas 
 
 	if isExists {
 
-		err := pageStructureRepo.IncrementStructureCountByURL(baseFieldDatas.SiteDomain, baseFieldDatas.Url)
+		err := pageStructureRepo.IncrementStructureCommentCountByURL(baseFieldDatas.SiteDomain, baseFieldDatas.Url)
 		if err != nil {
 			return err //Failed to fetch data from DynamoDB
 		}
@@ -161,7 +161,7 @@ func handleStructureProcess(tableRecords dynamo.AllTableRecords, baseFieldDatas 
 
 	if isGlobalStructureExists {
 
-		err := pageGlobalStructureRepo.IncrementGlobalStructureCountByURL(baseFieldDatas.SiteDomain)
+		err := pageGlobalStructureRepo.IncrementGlobalStructureUrlCountByURL(baseFieldDatas.SiteDomain)
 		if err != nil {
 			return err //Failed to fetch data from DynamoDB
 		}

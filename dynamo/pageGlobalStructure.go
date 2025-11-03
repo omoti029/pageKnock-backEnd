@@ -54,7 +54,7 @@ func (r *PageGlobalStructureRepository) GetGlobalStructure() ([]PageGlobalStruct
 	return records, nil
 }
 
-func (r *PageGlobalStructureRepository) IncrementGlobalStructureCountByURL(siteDomain string) error {
+func (r *PageGlobalStructureRepository) IncrementGlobalStructureUrlCountByURL(siteDomain string) error {
 
 	_, err := r.client.UpdateItem(context.TODO(), &dynamodb.UpdateItemInput{
 		TableName: aws.String(r.tableName),
@@ -64,7 +64,7 @@ func (r *PageGlobalStructureRepository) IncrementGlobalStructureCountByURL(siteD
 		},
 		UpdateExpression: aws.String("ADD #c :inc"),
 		ExpressionAttributeNames: map[string]string{
-			"#c": "count",
+			"#c": "urlCount",
 		},
 		ExpressionAttributeValues: map[string]types.AttributeValue{
 			":inc": &types.AttributeValueMemberN{Value: "1"},
@@ -73,7 +73,7 @@ func (r *PageGlobalStructureRepository) IncrementGlobalStructureCountByURL(siteD
 	})
 
 	if err != nil {
-		return fmt.Errorf("failed to increment count for %s", err)
+		return fmt.Errorf("failed to increment urlCount for %s", err)
 	}
 
 	return nil
