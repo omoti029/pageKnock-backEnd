@@ -69,9 +69,10 @@ func GenerateAllTableRecords(Datas BaseFieldDatas) AllTableRecords {
 			UrlCount:   1,
 		},
 		PageStructureItem: PageStructureItem{
-			SiteDomain:   Datas.SiteDomain,
-			Url:          Datas.Url,
-			CommentCount: 1,
+			SiteDomain:     Datas.SiteDomain,
+			Url:            Datas.Url,
+			CommentCount:   1,
+			LatestUnixTime: Datas.Now,
 		},
 		RecentDomainCommentItem: RecentDomainCommentItem{
 			SiteDomain: Datas.SiteDomain,

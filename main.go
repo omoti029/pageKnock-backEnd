@@ -199,7 +199,7 @@ func handleStructureProcess(tableRecords dynamo.AllTableRecords, baseFieldDatas 
 
 	if isExists {
 
-		err := pageStructureRepo.IncrementStructureCommentCountByURL(baseFieldDatas.SiteDomain, baseFieldDatas.Url)
+		err := pageStructureRepo.IncrementStructureCommentCountByURL(baseFieldDatas.SiteDomain, baseFieldDatas.Url, baseFieldDatas.Now)
 		if err != nil {
 			return err //Failed to fetch data from DynamoDB
 		}

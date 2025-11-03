@@ -44,9 +44,10 @@ type PageGlobalStructureItem struct {
 }
 
 type PageStructureItem struct {
-	SiteDomain   string `dynamodbav:"siteDomain"` //PartitionKey
-	Url          string `dynamodbav:"url"`        //Sort
-	CommentCount int    `dynamodbav:"commentCount"`
+	SiteDomain     string `dynamodbav:"siteDomain"` //PartitionKey
+	Url            string `dynamodbav:"url"`        //Sort
+	LatestUnixTime int64  `dynamodbav:"latestUnixTime"`
+	CommentCount   int    `dynamodbav:"commentCount"`
 }
 
 type RecentDomainCommentItem struct {
