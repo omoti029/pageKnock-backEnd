@@ -54,9 +54,17 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
+func enableCORS(w http.ResponseWriter, r *http.Request) {
+	if strings.Contains(r.Host, "localhost") {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	}
+}
 
 func handleGetPageGlobalStructure(w http.ResponseWriter, r *http.Request) {
 
+	enableCORS(w, r)
 	records, err := pageGlobalStructureRepo.GetGlobalStructure()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to fetch global structure: %v", err), http.StatusInternalServerError)
@@ -77,6 +85,7 @@ func handleGetPageGlobalStructure(w http.ResponseWriter, r *http.Request) {
 
 func handleGetRecentGlobalCommnet(w http.ResponseWriter, r *http.Request) {
 
+	enableCORS(w, r)
 	records, err := recentGlobalCommentRepo.GetRecentGlobalComment()
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to fetch global structure: %v", err), http.StatusInternalServerError)
@@ -100,6 +109,7 @@ func handleGetRecentGlobalCommnet(w http.ResponseWriter, r *http.Request) {
 
 func handlePostComment(w http.ResponseWriter, r *http.Request) {
 
+	enableCORS(w, r)
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
