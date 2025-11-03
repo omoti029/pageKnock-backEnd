@@ -49,7 +49,9 @@ func init() {
 func main() {
 	http.HandleFunc("/comment", handlePostComment)
 	http.HandleFunc("/getPageGlobalStructure", handleGetPageGlobalStructure)
+	http.HandleFunc("/getPageStructureBySiteDomain", handleGetPageStructureBySiteDomain)
 	http.HandleFunc("/getRecentGlobalCommnet", handleGetRecentGlobalCommnet)
+
 	fmt.Println("Server running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -60,6 +62,43 @@ func enableCORS(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 	}
+}
+
+func handleGetPageStructureBySiteDomain(w http.ResponseWriter, r *http.Request) {
+
+	var req struct {
+		SiteDomain string `json:"siteDomain"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	defer r.Body.Close()
+
+	if req.SiteDomain == "" {
+		http.Error(w, "Missing required fields", http.StatusBadRequest)
+		return
+	}
+
+	records, err := pageStructureRepo.GetStructureBySiteDomain(req.SiteDomain)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to fetch global structure: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	response := make([]dynamo.PageStructureResponse, 0, len(records))
+	for _, rec := range records {
+		response = append(response, dynamo.PageStructureResponse{
+			Url:            rec.Url,
+			CommentCount:   rec.CommentCount,
+			LatestUnixTime: rec.LatestUnixTime,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
 }
 
 func handleGetPageGlobalStructure(w http.ResponseWriter, r *http.Request) {
