@@ -49,6 +49,7 @@ func init() {
 func main() {
 	http.HandleFunc("/comment", handlePostComment)
 	http.HandleFunc("/getPageGlobalStructure", handleGetPageGlobalStructure)
+	http.HandleFunc("/getRecentGlobalCommnet", handleGetRecentGlobalCommnet)
 	fmt.Println("Server running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
@@ -74,6 +75,28 @@ func handleGetPageGlobalStructure(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func handleGetRecentGlobalCommnet(w http.ResponseWriter, r *http.Request) {
+
+	records, err := recentGlobalCommentRepo.GetRecentGlobalComment()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to fetch global structure: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	response := make([]dynamo.RecentGlobalCommentResponse, 0, len(records))
+	for _, rec := range records {
+		response = append(response, dynamo.RecentGlobalCommentResponse{
+			UnixTime:  rec.UnixTime,
+			Comment:   rec.Comment,
+			CommentId: rec.CommentId,
+			Url:       rec.Url,
+			UserID:    rec.UserID,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
 
 func handlePostComment(w http.ResponseWriter, r *http.Request) {
 
