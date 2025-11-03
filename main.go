@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"pageknock-backend/dynamo"
 
@@ -47,9 +48,32 @@ func init() {
 
 func main() {
 	http.HandleFunc("/comment", handlePostComment)
+	http.HandleFunc("/getPageGlobalStructure", handleGetPageGlobalStructure)
 	fmt.Println("Server running at http://localhost:8080")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
+
+
+func handleGetPageGlobalStructure(w http.ResponseWriter, r *http.Request) {
+
+	records, err := pageGlobalStructureRepo.GetGlobalStructure()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Failed to fetch global structure: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	response := make([]dynamo.PageGlobalStructureResponse, 0, len(records))
+	for _, rec := range records {
+		response = append(response, dynamo.PageGlobalStructureResponse{
+			SiteDomain: rec.SiteDomain,
+			UrlCount:   rec.UrlCount,
+		})
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
 
 func handlePostComment(w http.ResponseWriter, r *http.Request) {
 
